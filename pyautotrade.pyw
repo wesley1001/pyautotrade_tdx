@@ -80,6 +80,7 @@ class Operation:
         if direction == 'S':
             self._sell(code, quantity)
         closePopupWindows(self.hwnd)
+        time.sleep(0.3)
 
     def clickRefreshButton(self):
         '''
@@ -207,7 +208,6 @@ def monitor():
                             (dt.strftime('%x'), dt.strftime('%X'), actual_code,
                              actual_name, set_stock_info[row][3],
                              actual_price, set_stock_info[row][4], '已委托'))
-                        time.sleep(0.3)
                         is_ordered[row] = 0
 
                     if is_start and set_stock_info[row][1] == '<' and float(actual_price) < set_stock_info[row][2]:
@@ -217,7 +217,6 @@ def monitor():
                             (dt.strftime('%x'), dt.strftime('%X'), actual_code,
                              actual_name, set_stock_info[row][3],
                              actual_price, set_stock_info[row][4], '已委托'))
-                        time.sleep(0.3)
                         is_ordered[row] = 0
 
 
@@ -456,7 +455,7 @@ class StockGui:
                     else:
                         set_stock_info[row].append('')
                 elif col == 6:
-                    if temp.isdigit():
+                    if temp.isdigit() and int(temp) >= 0:
                         set_stock_info[row].append(str(int(temp) // 100 * 100))
                     else:
                         set_stock_info[row].append('')
