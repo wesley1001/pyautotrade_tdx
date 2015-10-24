@@ -455,8 +455,7 @@ class StockGui:
 
 if __name__ == '__main__':
     t1 = threading.Thread(target=StockGui)
-    t2 = threading.Thread(target=monitor)
     t1.start()
+    t1.join(2)
+    t2 = threading.Thread(target=monitor)
     t2.start()
-    t1.join()
-    t2.join()
