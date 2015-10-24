@@ -35,7 +35,7 @@ class Operation:
                 break
         temp_hwnds = dumpWindow(temp_hwnd)
         temp_hwnds = dumpWindow(temp_hwnds[1][0])
-        self.menu_hwnd = dumpWindow(temp_hwnds[0][0])
+        self.menu_hwnds = dumpWindow(temp_hwnds[0][0])
         self.buy_hwnds = dumpWindow(temp_hwnds[4][0])
         self.sell_hwnds = dumpWindow(temp_hwnds[5][0])
         self.withdrawal_hwnds = dumpWindow(temp_hwnds[6][0])
@@ -68,23 +68,22 @@ class Operation:
         if direction == 'S':
             self._sell(code, quantity)
         closePopupWindows(self.hwnd)
-        time.sleep(0.3)
 
     def clickRefreshButton(self):
         '''
         点击刷新按钮
         :return:
         '''
-        clickMenuButton(self.menu_hwnd[0][0], self.button['refresh'])
+        clickMenuButton(self.menu_hwnds[0][0], self.button['refresh'])
 
-    def _getListViewInfo(self, hwnd):
+    def _getListViewInfo(self, hwnd, cols):
         '''
         获取ListView的信息
         :param hwnd: ListView句柄
         :return:
         '''
         col_info = []
-        for col in range(10):
+        for col in range(cols):
             col_info.append(readListViewItems(hwnd, col))
         row_info = []
 
@@ -109,19 +108,19 @@ class Operation:
     def getPositionInfo(self):
         '''获取持仓股票信息
         '''
-        return self._getListViewInfo(self.buy_sell_hwnds[64][0])
+        return self._getListViewInfo(self.buy_sell_hwnds[64][0], 5)
 
     def getWithdrawalInfo(self):
         '''获取撤单信息
         '''
         # clickMenuButton(self.menu_hwnd[0][0], self.button['withdrawal'])
-        return self._getListViewInfo(self.withdrawal_hwnds[27][0])
+        return self._getListViewInfo(self.withdrawal_hwnds[27][0], 5)
 
     def getDealInfo(self):
         '''获取成交信息
         '''
         # clickMenuButton(self.menu_hwnd[0][0], self.button['deal'])
-        return self._getListViewInfo(self.deal_hwnds[27][0])
+        return self._getListViewInfo(self.deal_hwnds[27][0], 5)
 
 
 def pickCodeFromItems(items_info):
