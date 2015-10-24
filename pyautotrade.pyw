@@ -8,7 +8,6 @@ from tkinter.ttk import *
 import datetime
 import threading
 import pickle
-import configparser
 
 import tushare as ts
 
@@ -20,17 +19,6 @@ set_stock_info = []
 consignation_info = []
 actual_stock_info = []
 is_ordered = [1] * 5  # 1：未下单  0：已下单
-
-
-def getConfigData():
-    '''
-    读取配置文件参数
-    :return:双向委托界面下，控件的数量
-    '''
-    cp = configparser.ConfigParser()
-    cp.read('pyautotrading.ini')
-    numChildWindows = cp.getint('tradeVersion', 'numChildWindows')
-    return numChildWindows
 
 
 class Operation:
