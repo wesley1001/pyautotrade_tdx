@@ -16,17 +16,17 @@ from winguiauto import *
 is_start = False
 is_monitor = True
 set_stock_info = []
-consignation_info = []
 actual_stock_info = []
+consignation_info = []
 is_ordered = [1] * 5  # 1：未下单  0：已下单
 
 
 class Operation:
     def __init__(self, hwnd):
 
-        self.hwnd = hwnd
-        self.button = {'refresh': 180, 'position': 145, 'deal': 112, 'withdrawal': 83, 'sell': 50, 'buy': 20}
-        windows = dumpWindows(self.hwnd)
+        self.__hwnd = hwnd
+        self.__button = {'refresh': 180, 'position': 145, 'deal': 112, 'withdrawal': 83, 'sell': 50, 'buy': 20}
+        windows = dumpWindows(self.__hwnd)
         temp_hwnd = 0
         for window in windows:
             childHwnd, windowText, windowClass = window
@@ -35,100 +35,96 @@ class Operation:
                 break
         temp_hwnds = dumpWindow(temp_hwnd)
         temp_hwnds = dumpWindow(temp_hwnds[1][0])
-        self.menu_hwnds = dumpWindow(temp_hwnds[0][0])
-        self.buy_hwnds = dumpWindow(temp_hwnds[4][0])
-        self.sell_hwnds = dumpWindow(temp_hwnds[5][0])
-        self.withdrawal_hwnds = dumpWindow(temp_hwnds[6][0])
-        self.deal_hwnds = dumpWindow(temp_hwnds[7][0])
-        self.position_hwnds = dumpWindow(temp_hwnds[8][0])
-        self.buy_sell_hwnds = dumpWindow(temp_hwnds[9][0])
+        self.__menu_hwnds = dumpWindow(temp_hwnds[0][0])
+        self.__buy_hwnds = dumpWindow(temp_hwnds[4][0])
+        self.__sell_hwnds = dumpWindow(temp_hwnds[5][0])
+        self.__withdrawal_hwnds = dumpWindow(temp_hwnds[6][0])
+        self.__deal_hwnds = dumpWindow(temp_hwnds[7][0])
+        self.__position_hwnds = dumpWindow(temp_hwnds[8][0])
+        self.__buy_sell_hwnds = dumpWindow(temp_hwnds[9][0])
 
-    def _buy(self, code, quantity):
-        setEditText(self.buy_sell_hwnds[0][0], code)
+    def __buy(self, code, quantity):
+        """
+        买入函数
+        :param code: 股票代码，字符串
+        :param quantity: 数量， 字符串
+        """
+        setEditText(self.__buy_sell_hwnds[0][0], code)
         time.sleep(0.3)
         if quantity != '0':
-            setEditText(self.buy_sell_hwnds[3][0], quantity)
+            setEditText(self.__buy_sell_hwnds[3][0], quantity)
             time.sleep(0.3)
-        click(self.buy_sell_hwnds[5][0])
+        click(self.__buy_sell_hwnds[5][0])
         time.sleep(0.3)
 
-    def _sell(self, code, quantity):
-        setEditText(self.buy_sell_hwnds[24][0], code)
+    def __sell(self, code, quantity):
+        """
+        卖出函数
+        :param code: 股票代码， 字符串
+        :param quantity: 数量， 字符串
+        """
+        setEditText(self.__buy_sell_hwnds[24][0], code)
         time.sleep(0.3)
         if quantity != '0':
-            setEditText(self.buy_sell_hwnds[27][0], quantity)
+            setEditText(self.__buy_sell_hwnds[27][0], quantity)
             time.sleep(0.3)
-        click(self.buy_sell_hwnds[29][0])
+        click(self.__buy_sell_hwnds[29][0])
         time.sleep(0.3)
 
     def order(self, code, direction, quantity):
+        """
+        下单函数
+        :param code: 股票代码， 字符串
+        :param direction: 买卖方向
+        :param quantity: 数量， 字符串，数量为‘0’时，就交易软件指定数量
+        """
         self.clickRefreshButton()
         if direction == 'B':
-            self._buy(code, quantity)
+            self.__buy(code, quantity)
         if direction == 'S':
-            self._sell(code, quantity)
-        closePopupWindows(self.hwnd)
+            self.__sell(code, quantity)
+        closePopupWindows(self.__hwnd)
 
     def clickRefreshButton(self):
-        '''
+        """
         点击刷新按钮
-        :return:
-        '''
-        clickMenuButton(self.menu_hwnds[0][0], self.button['refresh'])
-
-    def _getListViewInfo(self, hwnd, cols):
-        '''
-        获取ListView的信息
-        :param hwnd: ListView句柄
-        :return:
-        '''
-        col_info = []
-        for col in range(cols):
-            col_info.append(readListViewItems(hwnd, col))
-        row_info = []
-
-        # 按行
-        for row in range(len(col_info[0])):
-            row_info.append([])
-            for col in range(len(col_info)):
-                row_info[row].append(col_info[col][row].decode('GB2312'))
-        return row_info
+        """
+        clickMenuButton(self.__menu_hwnds[0][0], self.__button['refresh'])
 
     def getMoneyInfo(self):
-        '''
-        :param sub_hwnds: 持仓句柄列表
+        """
         :return:可以资金，参考市值， 资产， 盈亏
-        '''
+        """
         # self.clickMenuButton(self.menu_hwnd[0][0], self.button['position'])
-        text = getWindowText(self.position_hwnds[1][0]).strip()
+        text = getWindowText(self.__position_hwnds[1][0]).strip()
         text = text.replace(':', ' ')
         text = text.split('')
         return float(text[3]), float(text[7]), float(text[9]), float(text[10])
 
     def getPositionInfo(self):
-        '''获取持仓股票信息
-        '''
-        return self._getListViewInfo(self.buy_sell_hwnds[64][0], 5)
+        """获取持仓股票信息
+        """
+        return getListViewInfo(self.__buy_sell_hwnds[64][0], 5)
 
     def getWithdrawalInfo(self):
-        '''获取撤单信息
-        '''
+        """获取撤单信息
+        """
         # clickMenuButton(self.menu_hwnd[0][0], self.button['withdrawal'])
-        return self._getListViewInfo(self.withdrawal_hwnds[27][0], 5)
+        return getListViewInfo(self.__withdrawal_hwnds[27][0], 5)
 
     def getDealInfo(self):
-        '''获取成交信息
-        '''
+        """获取成交信息
+        """
         # clickMenuButton(self.menu_hwnd[0][0], self.button['deal'])
-        return self._getListViewInfo(self.deal_hwnds[27][0], 5)
+        return getListViewInfo(self.__deal_hwnds[27][0], 5)
 
 
 def pickCodeFromItems(items_info):
-    '''
+    """
     提取股票代码
     :param items_info: UI下各项输入信息
     :return:股票代码列表
-    '''
+    """
     stock_codes = []
     for item in items_info:
         stock_codes.append(item[0])
@@ -136,11 +132,11 @@ def pickCodeFromItems(items_info):
 
 
 def getStockData(items_info):
-    '''
+    """
     获取股票实时数据
     :param items_info:UI下各项输入信息
     :return:股票实时数据
-    '''
+    """
     code_name_price = []
     stock_codes = pickCodeFromItems(items_info)
     try:
@@ -162,10 +158,10 @@ def getStockData(items_info):
 
 
 def monitor():
-    '''
+    """
     实时监控函数
     :return:
-    '''
+    """
     global actual_stock_info, consignation_info, is_ordered, set_stock_info
     count = 1
 
@@ -174,7 +170,7 @@ def monitor():
         tkinter.messagebox.showerror('错误', '请先打开通达信交易软件，再运行本软件')
     else:
         operation = Operation(top_hwnd)
-
+        # print(operation.getPositionInfo())
     while is_monitor and top_hwnd:
         if count % 200 == 0:
             # 点击刷新按钮
@@ -281,10 +277,10 @@ class StockGui:
         self.window.mainloop()
 
     def displayHisRecords(self):
-        '''
+        """
         显示历史信息
         :return:
-        '''
+        """
         global consignation_info
         tp = Toplevel()
         tp.title('历史记录')
@@ -304,10 +300,10 @@ class StockGui:
             tree.insert('', 0, values=msg)
 
     def save(self):
-        '''
+        """
         保存设置
         :return:
-        '''
+        """
         global set_stock_info, consignation_info
         self.getItems()
         with open('stockInfo.dat', 'wb') as fp:
@@ -315,10 +311,10 @@ class StockGui:
             pickle.dump(consignation_info, fp)
 
     def load(self):
-        '''
+        """
         载入设置
         :return:
-        '''
+        """
         global set_stock_info, consignation_info
         try:
             with open('stockInfo.dat', 'rb') as fp:
@@ -347,19 +343,19 @@ class StockGui:
                         self.variable[row][col].set(temp)
 
     def setFlags(self):
-        '''
+        """
         重置买卖标志
         :return:
-        '''
+        """
         global is_start, is_ordered
         if is_start is False:
             is_ordered = [1] * 5
 
     def updateControls(self):
-        '''
+        """
         实时股票名称、价格、状态信息
         :return:
-        '''
+        """
         global actual_stock_info, is_start
         if is_start:
             for row, (actual_code, actual_name, actual_price) in enumerate(actual_stock_info):
@@ -376,10 +372,10 @@ class StockGui:
         self.window.after(3000, self.updateControls)
 
     def start(self):
-        '''
+        """
         启动停止
         :return:
-        '''
+        """
         global is_start
         if is_start is False:
             is_start = True
@@ -397,18 +393,18 @@ class StockGui:
             self.load_bt['state'] = NORMAL
 
     def close(self):
-        '''
+        """
         关闭程序时，停止monitor线程
         :return:
-        '''
+        """
         global is_monitor
         is_monitor = False
         self.window.quit()
 
     def getItems(self):
-        '''
+        """
         获取UI上用户输入的各项数据，
-        '''
+        """
         global set_stock_info
         set_stock_info = []
 

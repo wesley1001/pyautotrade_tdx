@@ -48,6 +48,26 @@ def readListViewItems(hwnd, column_index=0):
     return item_texts
 
 
+def getListViewInfo(hwnd, cols):
+    """
+    获取ListView的信息
+    :param hwnd: sysListView句柄
+    :param cols: 读取的列数
+    :return: sysListView中的内容
+    """
+    col_info = []
+    for col in range(cols):
+        col_info.append(readListViewItems(hwnd, col))
+    row_info = []
+
+    # 按行
+    for row in range(len(col_info[0])):
+        row_info.append([])
+        for col in range(len(col_info)):
+            row_info[row].append(col_info[col][row].decode('GB2312'))
+    return row_info
+
+
 def findTopWindow(wantedText=None, wantedClass=None):
     '''
     :param wantedText: 标题名字
@@ -96,7 +116,6 @@ def findSubWindows(windows, numChildWindows):
         windowContent = dumpWindow(childHwnd)
         if len(windowContent) == numChildWindows:
             return windowContent
-
 
 
 def findSubWindow(windows, wantedText=None, wantedClass=None):
