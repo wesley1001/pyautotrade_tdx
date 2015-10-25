@@ -17,7 +17,7 @@ WriteProcessMemory = ctypes.windll.kernel32.WriteProcessMemory
 ReadProcessMemory = ctypes.windll.kernel32.ReadProcessMemory
 
 
-def readListViewItems(hwnd, column_index=0):
+def _readListViewItems(hwnd, column_index=0):
     # Allocate virtual memory inside target process
     pid = ctypes.create_string_buffer(4)
     p_pid = ctypes.addressof(pid)
@@ -57,7 +57,7 @@ def getListViewInfo(hwnd, cols):
     """
     col_info = []
     for col in range(cols):
-        col_info.append(readListViewItems(hwnd, col))
+        col_info.append(_readListViewItems(hwnd, col))
     row_info = []
 
     # 按行
