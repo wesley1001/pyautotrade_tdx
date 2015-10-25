@@ -29,9 +29,9 @@ class Operation:
         windows = dumpWindows(self.__hwnd)
         temp_hwnd = 0
         for window in windows:
-            childHwnd, windowText, windowClass = window
-            if windowClass == 'AfxMDIFrame42':
-                temp_hwnd = childHwnd
+            child_hwnd, window_text, window_class = window
+            if window_class == 'AfxMDIFrame42':
+                temp_hwnd = child_hwnd
                 break
         temp_hwnds = dumpWindow(temp_hwnd)
         temp_hwnds = dumpWindow(temp_hwnds[1][0])
