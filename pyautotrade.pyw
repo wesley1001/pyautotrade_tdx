@@ -8,10 +8,13 @@ from tkinter.ttk import *
 import datetime
 import threading
 import pickle
+import time
 
 import tushare as ts
 
-from winguiauto import *
+from winguiauto import (dumpWindow, dumpWindows, getWindowText,
+                        getListViewInfo, setEditText, clickMenuButton,
+                        click, closePopupWindows, findTopWindow)
 
 is_start = False
 is_monitor = True
