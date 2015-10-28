@@ -22,6 +22,7 @@ set_stock_info = []
 actual_stock_info = []
 consignation_info = []
 is_ordered = [1] * 5  # 1：未下单  0：已下单
+is_dealt = [0] * 5  # 0：未成交 num: 成交数量
 
 
 class Operation:
@@ -39,12 +40,7 @@ class Operation:
         temp_hwnds = dumpWindow(temp_hwnd)
         temp_hwnds = dumpWindow(temp_hwnds[1][0])
         self.__menu_hwnds = dumpWindow(temp_hwnds[0][0])
-        self.__buy_hwnds = dumpWindow(temp_hwnds[4][0])
-        self.__sell_hwnds = dumpWindow(temp_hwnds[5][0])
-        self.__withdrawal_hwnds = dumpWindow(temp_hwnds[6][0])
-        self.__deal_hwnds = dumpWindow(temp_hwnds[7][0])
-        self.__position_hwnds = dumpWindow(temp_hwnds[8][0])
-        self.__buy_sell_hwnds = dumpWindow(temp_hwnds[9][0])
+        self.__buy_sell_hwnds = dumpWindow(temp_hwnds[4][0])
 
     def __buy(self, code, quantity):
         """
@@ -96,30 +92,18 @@ class Operation:
 
     def getMoneyInfo(self):
         """
-        :return:可以资金，参考市值， 资产， 盈亏
+        :return:可用资金
         """
-        # self.clickMenuButton(self.menu_hwnd[0][0], self.button['position'])
-        text = getWindowText(self.__position_hwnds[1][0]).strip()
-        text = text.replace(':', ' ')
-        text = text.split('')
-        return float(text[3]), float(text[7]), float(text[9]), float(text[10])
+        self.clickRefreshButton()
+        setEditText(self.__buy_sell_hwnds[24][0], '999999')  # 测试时获得资金情况
+        time.sleep(0.3)
+        money = getWindowText(self.__buy_sell_hwnds[12][0]).strip()
+        return float(money)
 
     def getPositionInfo(self):
         """获取持仓股票信息
         """
         return getListViewInfo(self.__buy_sell_hwnds[64][0], 5)
-
-    def getWithdrawalInfo(self):
-        """获取撤单信息
-        """
-        # clickMenuButton(self.menu_hwnd[0][0], self.button['withdrawal'])
-        return getListViewInfo(self.__withdrawal_hwnds[27][0], 5)
-
-    def getDealInfo(self):
-        """获取成交信息
-        """
-        # clickMenuButton(self.menu_hwnd[0][0], self.button['deal'])
-        return getListViewInfo(self.__deal_hwnds[27][0], 5)
 
 
 def pickCodeFromItems(items_info):
@@ -173,13 +157,9 @@ def monitor():
         tkinter.messagebox.showerror('错误', '请先打开通达信交易软件，再运行本软件')
     else:
         operation = Operation(top_hwnd)
-        # print(operation.getPositionInfo())
+
     while is_monitor and top_hwnd:
-        if count % 200 == 0:
-            # 点击刷新按钮
-            operation.clickRefreshButton()
-        time.sleep(3)
-        count += 1
+
         if is_start:
             actual_stock_info = getStockData(set_stock_info)
             for row, (actual_code, actual_name, actual_price) in enumerate(actual_stock_info):
@@ -187,7 +167,7 @@ def monitor():
                         and set_stock_info[row][1] and set_stock_info[row][2] > 0 \
                         and set_stock_info[row][3] and set_stock_info[row][4] \
                         and datetime.datetime.now().time() > set_stock_info[row][5]:
-                    if is_start and set_stock_info[row][1] == '>' and float(actual_price) > set_stock_info[row][2]:
+                    if set_stock_info[row][1] == '>' and float(actual_price) > set_stock_info[row][2]:
                         operation.order(actual_code, set_stock_info[row][3], set_stock_info[row][4])
                         dt = datetime.datetime.now()
                         consignation_info.append(
@@ -196,7 +176,7 @@ def monitor():
                              actual_price, set_stock_info[row][4], '已委托'))
                         is_ordered[row] = 0
 
-                    if is_start and set_stock_info[row][1] == '<' and float(actual_price) < set_stock_info[row][2]:
+                    if set_stock_info[row][1] == '<' and float(actual_price) < set_stock_info[row][2]:
                         operation.order(actual_code, set_stock_info[row][3], set_stock_info[row][4])
                         dt = datetime.datetime.now()
                         consignation_info.append(
@@ -204,6 +184,11 @@ def monitor():
                              actual_name, set_stock_info[row][3],
                              actual_price, set_stock_info[row][4], '已委托'))
                         is_ordered[row] = 0
+
+        if count % 200 == 0:
+            operation.clickRefreshButton()
+        time.sleep(3)
+        count += 1
 
 
 class StockGui:
